@@ -6,5 +6,6 @@ namespace uecs {
 constexpr const char* VERSION_STR = "@PROJECT_VERSION@";
 constexpr uint32_t VERSION = (@PROJECT_VERSION_MAJOR@ << 16) | (@PROJECT_VERSION_MINOR@ << 8) | @PROJECT_VERSION_PATCH@;
 constexpr size_t MAX_ENTITY_COMPONENTS = @MAX_ENTITY_COMPONENTS@;
+constexpr size_t MAX_SYSTEMS = @MAX_SYSTEMS@;
 using id_type = @ID_TYPE@;
 }  // namespace ecs

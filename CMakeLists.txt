@@ -5,6 +5,7 @@ option(UECS_TEST_ENABLE "Build unit tests" ON)
 option(UECS_BUILD_EXAMPLES "Build examples" ON)
 
 set(MAX_ENTITY_COMPONENTS 64)
+set(MAX_SYSTEMS 64)
 set(ID_TYPE uint64_t)
 
 set(UECS_VERSION 0.0.1)
