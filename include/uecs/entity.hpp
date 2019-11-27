@@ -13,6 +13,8 @@ class Entity : public UniqueContainer<Component, MAX_ENTITY_COMPONENTS> {
  public:
   const id_type id() const;
 
+  const mask_type &component_mask() const;
+
  private:
   Entity(id_type id) : _id(id) {}
   Entity(const Entity &) = delete;

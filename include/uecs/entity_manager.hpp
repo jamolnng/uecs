@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iterator>
 #include <set>
 #include <unordered_map>
 
@@ -12,41 +13,29 @@ namespace uecs {
 class EntityManager : NonCopyable {
  public:
   using ComponentMask = Entity::mask_type;
-  template <typename... Components>
-  class View {
-   public:
-    View(ComponentMask mask);
-
-   private:
-    ComponentMask _mask;
-  };
+  using EntityContainer = std::unordered_map<id_type, Entity>;
 
   Entity& create();
   void destroy(id_type id);
 
-  template <typename... Components>
-  View<Components...> get_with_components() {
-    return View<Components...>(component_mask<Components...>());
-  }
-
- private:
-  id_type _next_id{0};
-  std::set<id_type> _unused_ids;
-  std::unordered_map<id_type, Entity> _entities;
-
-  id_type reserve_id();
-  void release_id(id_type id);
-
   template <typename C>
-  ComponentMask component_mask() {
+  static ComponentMask component_mask() {
     ComponentMask mask;
     mask.set(TypeID<C, Component>::value());
     return mask;
   }
 
   template <typename C1, typename C2, typename... Components>
-  ComponentMask component_mask() {
+  static ComponentMask component_mask() {
     return component_mask<C1>() | component_mask<C2, Components...>();
   }
+
+ private:
+  id_type _next_id{0};
+  std::set<id_type> _unused_ids;
+  EntityContainer _entities;
+
+  id_type reserve_id();
+  void release_id(id_type id);
 };
 }  // namespace uecs
