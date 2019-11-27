@@ -16,8 +16,7 @@ class UniqueContainer {
   using enable_if_T = std::enable_if<std::is_base_of<T, C>::value>;
 
  public:
-  UniqueContainer() = default;
-
+  using mask_type = std::bitset<MAX_T>;
   template <typename C, typename... Args, typename = enable_if_T<C>>
   std::shared_ptr<C> add(Args&&... args) {
     id_type cid = TypeID<C, T>::value();
@@ -55,7 +54,7 @@ class UniqueContainer {
   }
 
  protected:
-  std::bitset<MAX_T> _mask;
+  mask_type _mask;
   std::unordered_map<id_type, std::shared_ptr<T>> _ts;
 };
 }  // namespace uecs
