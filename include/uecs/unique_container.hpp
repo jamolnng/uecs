@@ -20,7 +20,7 @@ class UniqueContainer {
 
   template <typename C, typename... Args, typename = enable_if_T<C>>
   std::shared_ptr<C> add(Args&&... args) {
-    id_type cid = TypeID<C, Component>::value();
+    id_type cid = TypeID<C, T>::value();
     if (_mask.test(cid)) {
       return std::shared_ptr<C>(nullptr);
     }
