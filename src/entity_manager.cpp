@@ -1,4 +1,7 @@
 #include <uecs/entity_manager.hpp>
+
+#include <utility>
+
 using namespace uecs;
 
 id_type EntityManager::reserve_id() {
@@ -13,7 +16,16 @@ id_type EntityManager::reserve_id() {
   return id;
 }
 
-void EntityManager::release_id(id_type id) {
-  _unused_ids.insert(id >> (sizeof(id_type) * 8 / 2));
 void EntityManager::release_id(id_type id) { _unused_ids.insert(id); }
+
+Entity& EntityManager::create() {
+  id_type id = reserve_id();
+  _entities.emplace(std::piecewise_construct, std::forward_as_tuple(id),
+                    std::forward_as_tuple(id));
+  return _entities.at(id);
+}
+
+void EntityManager::destroy(id_type id) {
+  release_id(id);
+  _entities.erase(_entities.find(id));
 }
