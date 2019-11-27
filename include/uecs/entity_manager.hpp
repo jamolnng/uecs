@@ -6,7 +6,7 @@
 #include <uecs/type.hpp>
 
 namespace uecs {
-class EntityManager {
+class EntityManager : NonCopyable {
  public:
   EntityManager() = default;
 

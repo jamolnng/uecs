@@ -8,9 +8,10 @@
 #include <uecs/entity_manager.hpp>
 #include <uecs/system.hpp>
 #include <uecs/unique_container.hpp>
+#include <uecs/util.hpp>
 
 namespace uecs {
-class SystemManager : public UniqueContainer<System, MAX_SYSTEMS> {
+class SystemManager : NonCopyable, public UniqueContainer<System, MAX_SYSTEMS> {
  public:
   SystemManager(EntityManager& entity_manager);
 
