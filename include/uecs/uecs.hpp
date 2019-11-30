@@ -4,5 +4,7 @@
 #include <uecs/config.hpp>
 #include <uecs/entity.hpp>
 #include <uecs/entity_manager.hpp>
+#include <uecs/event.hpp>
+#include <uecs/event_manager.hpp>
 #include <uecs/system.hpp>
 #include <uecs/system_manager.hpp>
