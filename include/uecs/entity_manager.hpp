@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include <uecs/component.hpp>
+#include <uecs/component_manager.hpp>
 #include <uecs/entity.hpp>
 #include <uecs/type.hpp>
 #include <uecs/util.hpp>
@@ -12,7 +13,7 @@
 namespace uecs {
 class EntityManager : NonCopyable {
  public:
-  using ComponentMask = Entity::mask_type;
+  using ComponentMask = ComponentManager::ComponentContainer::mask_type;
   using EntityContainer = std::unordered_map<id_type, Entity>;
 
   Entity& create();

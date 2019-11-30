@@ -7,24 +7,7 @@
 class TestComponent : public uecs::Component {
  public:
   TestComponent(int i) : _i(i){};
-  int _i;
-};
-
-class TestComponent2 : public uecs::Component {
- public:
-  TestComponent2(int i) : _i(i){};
-  int _i;
-};
-
-class TestComponent3 : public uecs::Component {
- public:
-  TestComponent3(int i) : _i(i){};
-  int _i;
-};
-
-class TestComponent4 : public uecs::Component {
- public:
-  TestComponent4(int i) : _i(i){};
+  ~TestComponent() { std::cout << _i << " destroyed" << std::endl; }
   int _i;
 };
 
@@ -37,34 +20,32 @@ class TestSystem : public uecs::System {
 int main() {
   std::cout << std::boolalpha;
 
-  uecs::EntityManager manager;
-  uecs::Entity& e = manager.create();
-  std::cout << "eid: " << e.id() << std::endl;
-  std::cout << e.has<TestComponent>() << std::endl;
-  auto tc = e.add<TestComponent>(99);
-  std::cout << e.has<TestComponent>() << std::endl;
-  std::cout << tc->_i << " " << e.get<TestComponent>()->_i << std::endl;
-  e.remove<TestComponent>();
-  tc.reset(static_cast<TestComponent*>(nullptr));
-  std::cout << e.has<TestComponent>() << std::endl;
-  manager.destroy(e.id());
+  uecs::EntityManager em;
+  uecs::ComponentManager cm;
+  uecs::SystemManager sm(em, cm);
+  uecs::Entity& e1 = em.create();
+  uecs::Entity& e2 = em.create();
+  int i = 0;
 
-  uecs::SystemManager system(manager);
-
-  system.add<TestSystem>();
-
-  system.update<TestSystem>(manager, 10.0);
-  system.update(12);
-
-  system.remove<TestSystem>();
-  system.update(432);
-
-  uecs::EntityManager::component_mask<TestComponent, TestComponent2,
-                                      TestComponent3, TestComponent4>();
-  std::cout << uecs::EntityManager::component_mask<
-                   TestComponent, TestComponent2, TestComponent4>()
-                   .to_string()
+  std::cout << cm.has<TestComponent>(e1) << " " << cm.has<TestComponent>(e2)
             << std::endl;
+  cm.create<TestComponent>(e1, i++);
+  std::cout << cm.has<TestComponent>(e1) << " " << cm.has<TestComponent>(e2)
+            << std::endl;
+  cm.transfer<TestComponent>(e2, e1);
+  std::cout << cm.has<TestComponent>(e1) << " " << cm.has<TestComponent>(e2)
+            << std::endl;
+  cm.create<TestComponent>(e1, i++);
+  std::cout << cm.has<TestComponent>(e1) << " " << cm.has<TestComponent>(e2)
+            << std::endl;
+  auto p = cm.get<TestComponent>(e2);
+  cm.remove<TestComponent>(e2);
+  std::cout << cm.has<TestComponent>(e1) << " " << cm.has<TestComponent>(e2)
+            << std::endl;
+  cm.bind(e2, p);
+  std::cout << cm.has<TestComponent>(e1) << " " << cm.has<TestComponent>(e2)
+            << std::endl;
+  cm.get<TestComponent>(e1)->_i = 4;
 
   return 0;
 }

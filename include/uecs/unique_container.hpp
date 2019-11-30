@@ -4,6 +4,7 @@
 #include <memory>
 #include <type_traits>
 #include <unordered_map>
+#include <array>
 
 #include <uecs/config.hpp>
 #include <uecs/type.hpp>
@@ -36,7 +37,7 @@ class UniqueContainer {
       return;
     }
     _mask.reset(cid);
-    _ts.erase(cid);
+    _ts[cid].reset();
   }
 
   template <typename C, typename = enable_if_T<C>>
@@ -49,12 +50,34 @@ class UniqueContainer {
   }
 
   template <typename C, typename = enable_if_T<C>>
+  std::shared_ptr<C> insert(std::shared_ptr<C> c) {
+    id_type cid = TypeID<C, T>::value();
+    if (_mask.test(cid)) {
+      return std::shared_ptr<C>(nullptr);
+    }
+    _mask.set(cid);
+    _ts[cid] = std::move(c);
+    return std::shared_ptr<C>(std::static_pointer_cast<C>(_ts[cid]));
+  }
+
+  template <typename C, typename = enable_if_T<C>>
+  std::shared_ptr<C> insert(C&& c) {
+    id_type cid = TypeID<C, T>::value();
+    if (_mask.test(cid)) {
+      return std::shared_ptr<C>(nullptr);
+    }
+    _mask.set(cid);
+    _ts[cid] = std::make_shared<C>(std::move(c));
+    return std::shared_ptr<C>(std::static_pointer_cast<C>(_ts[cid]));
+  }
+
+  template <typename C, typename = enable_if_T<C>>
   bool has() {
     return _mask.test(TypeID<C, T>::value());
   }
 
  protected:
   mask_type _mask;
-  std::unordered_map<id_type, std::shared_ptr<T>> _ts;
+  std::array<std::shared_ptr<T>, MAX_T> _ts;
 };
 }  // namespace uecs

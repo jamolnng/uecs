@@ -1,9 +1,6 @@
 #pragma once
 
-#include <memory>
-#include <type_traits>
-#include <unordered_map>
-
+#include <uecs/component_manager.hpp>
 #include <uecs/config.hpp>
 #include <uecs/entity_manager.hpp>
 #include <uecs/system.hpp>
@@ -13,7 +10,8 @@
 namespace uecs {
 class SystemManager : NonCopyable, public UniqueContainer<System, MAX_SYSTEMS> {
  public:
-  SystemManager(EntityManager& entity_manager);
+  SystemManager(EntityManager& entity_manager,
+                ComponentManager& component_manager);
 
   template <typename S, typename = enable_if_T<S>>
   void update(EntityManager& entity_manager, double dt) {
@@ -24,5 +22,6 @@ class SystemManager : NonCopyable, public UniqueContainer<System, MAX_SYSTEMS> {
 
  private:
   EntityManager& _entity_manager;
+  ComponentManager& _component_manager;
 };
 }  // namespace uecs

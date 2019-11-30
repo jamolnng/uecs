@@ -9,11 +9,9 @@
 #include <uecs/util.hpp>
 
 namespace uecs {
-class Entity : public UniqueContainer<Component, MAX_ENTITY_COMPONENTS> {
+class Entity {
  public:
   const id_type id() const;
-
-  const mask_type &component_mask() const;
 
  private:
   Entity(id_type id) : _id(id) {}
