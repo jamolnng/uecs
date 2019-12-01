@@ -9,11 +9,12 @@
 #include <uecs/util.hpp>
 
 namespace uecs {
-class ComponentManager : NonCopyable {
+class ComponentManager : public NonCopyable {
  public:
   using ComponentContainer = UniqueContainer<Component, MAX_ENTITY_COMPONENTS>;
   using EntityComponentContainer =
       std::unordered_map<id_type, ComponentContainer>;
+  using ComponentMask = ComponentContainer::mask_type;
 
   template <typename C, typename... Args>
   std::shared_ptr<C> create(id_type entity_id, Args&&... args) {
@@ -88,7 +89,11 @@ class ComponentManager : NonCopyable {
     remove<C>(e.id());
   }
 
+  const ComponentMask& component_mask(id_type entity_id);
+  const ComponentMask& component_mask(const Entity& e);
+
  private:
+  friend class EntityManager;
   EntityComponentContainer _entity_components;
 
   ComponentContainer& _check_exists(id_type entity_id);

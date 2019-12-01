@@ -74,6 +74,8 @@ class UniqueContainer {
     return _mask.test(TypeID<C, T>::value());
   }
 
+  const mask_type& mask() { return _mask; }
+
  protected:
   mask_type _mask;
   std::array<std::shared_ptr<T>, MAX_T> _ts;
