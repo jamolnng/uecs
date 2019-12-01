@@ -33,8 +33,7 @@ void EntityManager::destroy(id_type id) {
   _entities.erase(_entities.find(id));
 }
 
-const EntityManager::ComponentMask& uecs::EntityManager::component_mask(
-    Entity& e) {
+const EntityManager::ComponentMask& EntityManager::component_mask(const Entity& e) {
   return _component_manager.component_mask(e);
 }
 

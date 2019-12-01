@@ -13,7 +13,8 @@
 namespace uecs {
 class EntityManager : public NonCopyable {
  public:
-  using ComponentMask = ComponentManager::ComponentContainer::mask_type;
+  using ComponentMask = ComponentManager::ComponentMask;
+  using ComponentContainer = ComponentManager::ComponentContainer;
   using EntityContainer = std::unordered_map<id_type, Entity>;
 
   class iterator : std::iterator<std::forward_iterator_tag, Entity> {
@@ -33,16 +34,48 @@ class EntityManager : public NonCopyable {
    private:
     int_iter _index;
   };
-  iterator begin() { return iterator(_entities.begin()); }
-  iterator end() { return iterator(_entities.end()); }
+
+  template <typename... Args>
+  class ComponentView {
+   public:
+    class iterator : public std::iterator<std::forward_iterator_tag,
+                                          std::shared_ptr<Component>> {
+     public:
+      iterator() {}
+
+      inline iterator& operator++() {
+        // TODO ++
+        return *this;
+      }
+      inline bool operator!=(iterator& it) {
+        // TODO
+        return false;
+      }
+      inline Entity& operator*() { 
+        // TODO
+        return {};
+      }
+
+     private:
+    };
+    iterator begin() { return iterator(); }
+    iterator end() { return iterator(); }
+
+   private:
+  };
 
   EntityManager(ComponentManager& component_manager);
 
   Entity& create();
   void destroy(id_type id);
 
-  const ComponentMask& component_mask(Entity& e);
   const ComponentMask& component_mask(id_type id);
+  const ComponentMask& component_mask(const Entity& e);
+
+  iterator begin() { return iterator(_entities.begin()); }
+  iterator end() { return iterator(_entities.end()); }
+  size_t size() { return _entities.size(); }
+  bool empty() { return _entities.empty(); }
 
   template <typename C>
   static ComponentMask component_mask() {
