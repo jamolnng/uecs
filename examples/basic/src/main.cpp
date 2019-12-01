@@ -18,6 +18,13 @@ class TestComponent1 : public uecs::Component {
   int _i;
 };
 
+class TestComponent2 : public uecs::Component {
+ public:
+  TestComponent2(int i) : _i(i){};
+  ~TestComponent2() { std::cout << _i << " destroyed 1" << std::endl; }
+  int _i;
+};
+
 class TestSystem : public uecs::System {
  public:
   TestSystem() = default;
@@ -73,13 +80,17 @@ int main() {
             << std::endl;
   cm.get<TestComponent>(e1)->_i = 4;
 
-  cm.remove<TestComponent>(e2);
   cm.create<TestComponent1>(e2, i++);
   std::cout << em.component_mask(e2).to_string() << std::endl;
-  cm.remove<TestComponent1>(e2);
 
   for (uecs::Entity& e : em) {
     std::cout << e.id() << std::endl;
+  }
+  std::cout << "****************" << std::endl;
+  std::cout << e1.id() << " " << cm.has<TestComponent>(e1) << " " << e2.id()
+            << " " << cm.has<TestComponent>(e2) << std::endl;
+  for (auto& e : em.component_view<TestComponent2>()) {
+    std::cout << e.id() << " " << cm.has<TestComponent2>(e) << std::endl;
   }
 
   uecs::EventManager evm;

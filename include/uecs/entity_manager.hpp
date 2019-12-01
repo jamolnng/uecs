@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include <iterator>
 #include <set>
 #include <unordered_map>
@@ -40,28 +42,46 @@ class EntityManager : public NonCopyable {
    public:
     class iterator : public std::iterator<std::forward_iterator_tag,
                                           std::shared_ptr<Component>> {
+      using int_iter = EntityContainer::iterator;
+
      public:
-      iterator() {}
+      iterator(EntityManager& em, int_iter index, int_iter end)
+          : _em(em),
+            _index(index),
+            _end(end),
+            _mask(EntityManager::component_mask<Args...>()) {
+        while (_index != _end &&
+               (_mask & _em.component_mask(_index->second)) != _mask) {
+          ++_index;
+        }
+      }
 
       inline iterator& operator++() {
-        // TODO ++
+        do {
+          ++_index;
+        } while (_index != _end &&
+                 (_mask & _em.component_mask(_index->second)) != _mask);
         return *this;
       }
-      inline bool operator!=(iterator& it) {
-        // TODO
-        return false;
-      }
-      inline Entity& operator*() { 
-        // TODO
-        return {};
-      }
+      inline bool operator!=(iterator& it) { return it._index != _index; }
+      inline Entity& operator*() { return _index->second; }
 
      private:
+      EntityManager& _em;
+      ComponentMask _mask;
+      int_iter _index, _end;
     };
-    iterator begin() { return iterator(); }
-    iterator end() { return iterator(); }
+    ComponentView(EntityManager& em) : _em(em) {}
+
+    iterator begin() {
+      return iterator(_em, _em._entities.begin(), _em._entities.end());
+    }
+    iterator end() {
+      return iterator(_em, _em._entities.end(), _em._entities.end());
+    }
 
    private:
+    EntityManager& _em;
   };
 
   EntityManager(ComponentManager& component_manager);
@@ -76,6 +96,11 @@ class EntityManager : public NonCopyable {
   iterator end() { return iterator(_entities.end()); }
   size_t size() { return _entities.size(); }
   bool empty() { return _entities.empty(); }
+
+  template <typename... Components>
+  ComponentView<Components...> component_view() {
+    return ComponentView<Components...>(*this);
+  }
 
   template <typename C>
   static ComponentMask component_mask() {
