@@ -17,6 +17,24 @@ class TestSystem : public uecs::System {
   virtual void update(double dt) override { std::cout << dt << std::endl; }
 };
 
+class TestEvent : public uecs::Event, public uecs::NonCopyable {
+ public:
+  TestEvent(std::string test) : _test(test){};
+  std::string _test;
+};
+
+class TestEvent1 : public uecs::Event, public uecs::NonCopyable {
+ public:
+  TestEvent1(std::string test) : _test(test){};
+  std::string _test;
+};
+
+class TestReceiver : public uecs::EventReceiver, public uecs::NonCopyable {
+ public:
+  void receive(const TestEvent& e) { std::cout << e._test << std::endl; }
+  void receive(const TestEvent1& e) { std::cout << e._test << std::endl; }
+};
+
 int main() {
   std::cout << std::boolalpha;
 
@@ -46,6 +64,21 @@ int main() {
   std::cout << cm.has<TestComponent>(e1) << " " << cm.has<TestComponent>(e2)
             << std::endl;
   cm.get<TestComponent>(e1)->_i = 4;
+
+  uecs::EventManager evm;
+  TestReceiver tr;
+  evm.subscribe<TestEvent>(tr);
+  evm.subscribe<TestEvent1>(tr);
+  evm.emit<TestEvent>("test a");
+  evm.emit<TestEvent1>("test b");
+  evm.unsubscribe<TestEvent>(tr);
+  evm.emit<TestEvent>("test c");
+  evm.emit<TestEvent1>("test d");
+  std::shared_ptr<TestEvent1> t1 = std::make_shared<TestEvent1>("test e");
+  evm.emit<TestEvent1>(*t1);
+  evm.emit<TestEvent1>(*t1);
+  evm.emit<TestEvent1>(t1);
+  evm.emit<TestEvent1>(t1);
 
   return 0;
 }

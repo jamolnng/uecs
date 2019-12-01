@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iterator>
 #include <set>
 #include <unordered_map>
 

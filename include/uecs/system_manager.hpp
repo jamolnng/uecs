@@ -8,7 +8,8 @@
 #include <uecs/util.hpp>
 
 namespace uecs {
-class SystemManager : NonCopyable, public UniqueContainer<System, MAX_SYSTEMS> {
+class SystemManager : public NonCopyable,
+                      public UniqueContainer<System, MAX_SYSTEMS> {
  public:
   SystemManager(EntityManager& entity_manager,
                 ComponentManager& component_manager);

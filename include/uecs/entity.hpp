@@ -1,12 +1,8 @@
 #pragma once
 
-#include <iostream>
+#include <utility>
 
-#include <uecs/component.hpp>
-#include <uecs/config.hpp>
 #include <uecs/type.hpp>
-#include <uecs/unique_container.hpp>
-#include <uecs/util.hpp>
 
 namespace uecs {
 class Entity {

@@ -1,12 +1,10 @@
 #pragma once
 
+#include <array>
 #include <bitset>
 #include <memory>
 #include <type_traits>
-#include <unordered_map>
-#include <array>
 
-#include <uecs/config.hpp>
 #include <uecs/type.hpp>
 
 namespace uecs {
