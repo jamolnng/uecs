@@ -1,8 +1,8 @@
 #pragma once
 
 namespace uecs {
-class EventReceiver {
+class EventListener {
  public:
-  EventReceiver() = default;
+  EventListener() = default;
 };
 }  // namespace uecs

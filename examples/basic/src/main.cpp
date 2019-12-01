@@ -29,7 +29,7 @@ class TestEvent1 : public uecs::Event, public uecs::NonCopyable {
   std::string _test;
 };
 
-class TestReceiver : public uecs::EventReceiver, public uecs::NonCopyable {
+class TestReceiver : public uecs::EventListener, public uecs::NonCopyable {
  public:
   void receive(const TestEvent& e) { std::cout << e._test << std::endl; }
   void receive(const TestEvent1& e) { std::cout << e._test << std::endl; }
