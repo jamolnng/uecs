@@ -2,6 +2,7 @@
 
 #include <array>
 #include <bitset>
+#include <iterator>
 #include <memory>
 #include <type_traits>
 
@@ -16,6 +17,42 @@ class UniqueContainer {
 
  public:
   using mask_type = std::bitset<MAX_T>;
+  using array_type = std::array<std::shared_ptr<T>, MAX_T>;
+
+  class iterator
+      : public std::iterator<std::forward_iterator_tag, std::shared_ptr<T>> {
+   private:
+    using int_iter = size_t;
+
+   public:
+    iterator(int_iter index, array_type& arr) : _index(index), _arr(arr) {
+      while (_index != _arr.size() && _arr.at(_index) == nullptr) {
+        ++_index;
+      }
+    }
+
+    inline iterator& operator++() {
+      do {
+        ++_index;
+      } while (_index != _arr.size() && _arr.at(_index) == nullptr);
+      return *this;
+    }
+    inline iterator& operator++(int) {
+      ++(*this);
+      return *this;
+    }
+    inline bool operator==(iterator& it) const { return it._index == _index; }
+    inline bool operator!=(iterator& it) const { return it._index != _index; }
+    inline std::shared_ptr<T> operator*() const { return _arr.at(_index); }
+
+   private:
+    int_iter _index;
+    array_type& _arr;
+  };
+
+  iterator begin() { return iterator(0, _ts); }
+  iterator end() { return iterator(_ts.size(), _ts); }
+
   template <typename C, typename... Args, typename = enable_if_T<C>>
   std::shared_ptr<C> add(Args&&... args) {
     id_type cid = TypeID<C, T>::value();
@@ -69,15 +106,25 @@ class UniqueContainer {
     return std::shared_ptr<C>(std::static_pointer_cast<C>(_ts[cid]));
   }
 
+  void clear() {
+    _mask.reset();
+    for (auto& s : _ts) {
+      s = nullptr;
+    }
+  }
+
   template <typename C, typename = enable_if_T<C>>
-  bool has() {
+  bool has() const {
     return _mask.test(TypeID<C, T>::value());
   }
 
-  const mask_type& mask() { return _mask; }
+  const mask_type& mask() const { return _mask; }
+
+  size_t size() const { _mask.count(); }
+  size_t capacity() const { return MAX_T; }
 
  protected:
   mask_type _mask;
-  std::array<std::shared_ptr<T>, MAX_T> _ts;
+  array_type _ts;
 };
 }  // namespace uecs

@@ -10,6 +10,8 @@
 #include <uecs/component.hpp>
 #include <uecs/component_manager.hpp>
 #include <uecs/entity.hpp>
+#include <uecs/event.hpp>
+#include <uecs/event_manager.hpp>
 #include <uecs/type.hpp>
 #include <uecs/util.hpp>
 
@@ -110,10 +112,20 @@ class EntityManager : public NonCopyable {
     EntityManager& _em;
   };
 
-  EntityManager(ComponentManager& component_manager);
+  struct EntityCreatedEvent : public Event {
+    EntityCreatedEvent(Entity& entity) : entity(entity) {}
+    Entity& entity;
+  };
+  struct EntityDestroyedEvent : public Event {
+    EntityDestroyedEvent(Entity& entity) : entity(entity) {}
+    Entity& entity;
+  };
+
+  EntityManager(ComponentManager& component_manager,
+                EventManager& event_manager);
 
   Entity& create();
-  void destroy(id_type id);
+  void destroy(Entity& e);
 
   iterator begin() { return iterator(_entities.begin()); }
   iterator end() { return iterator(_entities.end()); }
@@ -136,6 +148,7 @@ class EntityManager : public NonCopyable {
   std::set<id_type> _unused_ids;
   EntityContainer _entities;
   ComponentManager& _component_manager;
+  EventManager& _event_manager;
 
   id_type reserve_id();
   void release_id(id_type id);

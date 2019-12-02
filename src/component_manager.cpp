@@ -2,17 +2,17 @@
 
 using namespace uecs;
 
-ComponentManager::ComponentContainer& ComponentManager::_check_exists(
-    id_type entity_id) {
-  return _entity_components.try_emplace(entity_id).first->second;
-}
+ComponentManager::ComponentManager(EventManager& event_manager)
+    : _event_manager(event_manager) {}
 
 const ComponentManager::ComponentMask& ComponentManager::component_mask(
-    id_type entity_id) {
-  return _entity_components[entity_id].mask();
+    Entity& e) {
+  return _entity_components[e.id()].mask();
 }
 
-const ComponentManager::ComponentMask& ComponentManager::component_mask(
-    const Entity& e) {
-  return component_mask(e.id());
+void ComponentManager::remove_all(Entity& e) {
+  for (auto c : _entity_component_helpers[e.id()]) {
+    c->remove(*this, e);
+  }
+  _entity_components[e.id()].clear();
 }

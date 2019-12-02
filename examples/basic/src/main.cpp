@@ -7,21 +7,18 @@
 class TestComponent : public uecs::Component {
  public:
   TestComponent(int i) : _i(i){};
-  ~TestComponent() { std::cout << _i << " destroyed" << std::endl; }
   int _i;
 };
 
 class TestComponent1 : public uecs::Component {
  public:
   TestComponent1(int i) : _i(i){};
-  ~TestComponent1() { std::cout << _i << " destroyed 1" << std::endl; }
   int _i;
 };
 
 class TestComponent2 : public uecs::Component {
  public:
   TestComponent2(int i) : _i(i){};
-  ~TestComponent2() { std::cout << _i << " destroyed 1" << std::endl; }
   int _i;
 };
 
@@ -47,67 +44,141 @@ class TestReceiver : public uecs::EventListener, public uecs::NonCopyable {
  public:
   void receive(const TestEvent& e) { std::cout << e._test << std::endl; }
   void receive(const TestEvent1& e) { std::cout << e._test << std::endl; }
+
+  void receive(const uecs::EntityManager::EntityCreatedEvent& e) {
+    std::cout << "Entity created. ID: " << e.entity.id() << std::endl;
+  }
+  void receive(const uecs::EntityManager::EntityDestroyedEvent& e) {
+    std::cout << "Entity destroyed. ID: " << e.entity.id() << std::endl;
+  }
+  void receive(
+      const uecs::ComponentManager::ComponentCreatedEvent<TestComponent>& c) {
+    std::cout << "TestComponent created. Entity ID: " << c.entity.id()
+              << " ci:" << c.component->_i << std::endl;
+  }
+  void receive(
+      const uecs::ComponentManager::ComponentCreatedEvent<TestComponent1>& c) {
+    std::cout << "TestComponent1 created. Entity ID: " << c.entity.id()
+              << " ci:" << c.component->_i << std::endl;
+  }
+  void receive(
+      const uecs::ComponentManager::ComponentRemovedEvent<TestComponent>& c) {
+    std::cout << "TestComponent removed. Entity ID: " << c.entity.id()
+              << " ci:" << c.component->_i << std::endl;
+  }
+  void receive(
+      const uecs::ComponentManager::ComponentRemovedEvent<TestComponent1>& c) {
+    std::cout << "TestComponent1 removed. Entity ID: " << c.entity.id()
+              << " ci:" << c.component->_i << std::endl;
+  }
+  void receive(
+      const uecs::ComponentManager::ComponentSwappedEvent<TestComponent>& c) {
+    std::cout << "TestComponent swapped to Entity ID: " << c.to.id() << " from "
+              << c.from.id() << " ci:" << c.component->_i << std::endl;
+  }
+  void receive(
+      const uecs::ComponentManager::ComponentSwappedEvent<TestComponent1>& c) {
+    std::cout << "TestComponent1 swapped to Entity ID: " << c.to.id()
+              << " from " << c.from.id() << " ci:" << c.component->_i
+              << std::endl;
+  }
+  void receive(
+      const uecs::ComponentManager::ComponentBoundEvent<TestComponent>& c) {
+    std::cout << "TestComponent bound. Entity ID: " << c.entity.id()
+              << " ci:" << c.component->_i << std::endl;
+  }
+  void receive(
+      const uecs::ComponentManager::ComponentBoundEvent<TestComponent1>& c) {
+    std::cout << "TestComponent1 bound. Entity ID: " << c.entity.id()
+              << " ci:" << c.component->_i << std::endl;
+  }
+  void receive(
+      const uecs::ComponentManager::ComponentDestroyedEvent<TestComponent>& c) {
+    std::cout << "TestComponent destroyed. Entity ID: " << c.entity.id()
+              << " ci:" << c.component->_i << std::endl;
+  }
+  void receive(
+      const uecs::ComponentManager::ComponentDestroyedEvent<TestComponent1>&
+          c) {
+    std::cout << "TestComponent1 destroyed. Entity ID: " << c.entity.id()
+              << " ci:" << c.component->_i << std::endl;
+  }
 };
 
 int main() {
+  std::array<int, 5>::iterator it;
+
   std::cout << std::boolalpha;
 
-  uecs::ComponentManager cm;
-  uecs::EntityManager em(cm);
-  uecs::SystemManager sm(em, cm);
+  uecs::EventManager evm;
+  uecs::ComponentManager cm(evm);
+  uecs::EntityManager em(cm, evm);
+  uecs::SystemManager sm(em, cm, evm);
+
+  TestReceiver tr;
+  evm.subscribe<uecs::EntityManager::EntityCreatedEvent>(tr);
+  evm.subscribe<uecs::EntityManager::EntityDestroyedEvent>(tr);
+  evm.subscribe<uecs::ComponentManager::ComponentCreatedEvent<TestComponent>>(
+      tr);
+  evm.subscribe<uecs::ComponentManager::ComponentCreatedEvent<TestComponent1>>(
+      tr);
+  evm.subscribe<uecs::ComponentManager::ComponentRemovedEvent<TestComponent>>(
+      tr);
+  evm.subscribe<uecs::ComponentManager::ComponentRemovedEvent<TestComponent1>>(
+      tr);
+  evm.subscribe<uecs::ComponentManager::ComponentSwappedEvent<TestComponent>>(
+      tr);
+  evm.subscribe<uecs::ComponentManager::ComponentSwappedEvent<TestComponent1>>(
+      tr);
+  evm.subscribe<uecs::ComponentManager::ComponentBoundEvent<TestComponent>>(tr);
+  evm.subscribe<uecs::ComponentManager::ComponentBoundEvent<TestComponent1>>(
+      tr);
+  evm.subscribe<uecs::ComponentManager::ComponentDestroyedEvent<TestComponent>>(
+      tr);
+  evm.subscribe<
+      uecs::ComponentManager::ComponentDestroyedEvent<TestComponent1>>(tr);
+
   uecs::Entity& e1 = em.create();
   uecs::Entity& e2 = em.create();
   uecs::Entity& e3 = em.create();
+  e3.destroy();
 
   int i = 0;
 
-  std::cout << cm.has<TestComponent>(e1) << " " << cm.has<TestComponent>(e2)
-            << std::endl;
   cm.create<TestComponent>(e1, i++);
-  std::cout << cm.has<TestComponent>(e1) << " " << cm.has<TestComponent>(e2)
-            << std::endl;
-  cm.transfer<TestComponent>(e2, e1);
-  std::cout << cm.has<TestComponent>(e1) << " " << cm.has<TestComponent>(e2)
-            << std::endl;
+  cm.swap<TestComponent>(e2, e1);
   cm.create<TestComponent>(e1, i++);
-  std::cout << cm.has<TestComponent>(e1) << " " << cm.has<TestComponent>(e2)
-            << std::endl;
   auto p = cm.get<TestComponent>(e2);
   cm.remove<TestComponent>(e2);
-  std::cout << cm.has<TestComponent>(e1) << " " << cm.has<TestComponent>(e2)
-            << std::endl;
   cm.bind(e2, p);
-  std::cout << cm.has<TestComponent>(e1) << " " << cm.has<TestComponent>(e2)
-            << std::endl;
+  p.reset();
   cm.get<TestComponent>(e1)->_i = 4;
 
   cm.create<TestComponent1>(e2, i++);
-  std::cout << cm.component_mask(e2).to_string() << std::endl;
 
+  std::cout << "Entities:" << std::endl;
   for (uecs::Entity& e : em) {
     std::cout << e.id() << std::endl;
   }
-  std::cout << "****************" << std::endl;
-  std::cout << e1.id() << " " << cm.has<TestComponent1>(e1) << " " << e2.id()
-            << " " << cm.has<TestComponent1>(e2) << std::endl;
-  std::cout << "Empty: " << em.component_view<TestComponent1>().empty()
-            << " | Size: " << em.component_view<TestComponent1>().size()
-            << std::endl;
+  std::cout
+      << "Entities with TestComponent and TestComponent1 two different ways:"
+      << std::endl;
   for (auto& e : em.component_view<TestComponent, TestComponent1>()) {
-    std::cout << e.id() << " " << cm.get<TestComponent>(e)->_i << " "
+    std::cout << "Entity ID: " << e.id() << " ci "
+              << cm.get<TestComponent>(e)->_i << " c1i "
               << cm.get<TestComponent1>(e)->_i << std::endl;
   }
 
-  std::cout << "********3333********" << std::endl;
   em.for_each<TestComponent, TestComponent1>(
       [&](uecs::Entity& e, TestComponent& t, TestComponent1& t1) {
-        std::cout << t._i << " " << t1._i << std::endl;
+        std::cout << "Entity ID: " << e.id() << " ci " << t._i << " c1i " << t1._i
+                  << std::endl;
       });
-  std::cout << "********3333********" << std::endl;
 
-  uecs::EventManager evm;
-  TestReceiver tr;
-  evm.subscribe<TestEvent>(tr);
+  e1.destroy();
+  e2.destroy();
+
+  /*evm.subscribe<TestEvent>(tr);
   evm.subscribe<TestEvent1>(tr);
   evm.emit<TestEvent>("test a");
   evm.emit<TestEvent1>("test b");
@@ -119,7 +190,7 @@ int main() {
   evm.emit<TestEvent>(*t);
   evm.emit<TestEvent1>(*t1);
   evm.emit<TestEvent>(t);
-  evm.emit<TestEvent1>(t1);
+  evm.emit<TestEvent1>(t1);*/
 
   return 0;
 }
