@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include <functional>
 #include <iterator>
 #include <set>
 #include <unordered_map>
@@ -30,6 +31,11 @@ class EntityManager : public NonCopyable {
       ++_index;
       return *this;
     }
+    inline iterator& operator++(int) {
+      ++(*this);
+      return *this;
+    }
+    inline bool operator==(iterator& it) const { return it._index == _index; }
     inline bool operator!=(iterator& it) { return it._index != _index; }
     inline Entity& operator*() { return _index->second; }
 
@@ -37,21 +43,20 @@ class EntityManager : public NonCopyable {
     int_iter _index;
   };
 
-  template <typename... Args>
+  template <typename... Components>
   class ComponentView {
    public:
-    class iterator : public std::iterator<std::forward_iterator_tag,
-                                          std::shared_ptr<Component>> {
+    class iterator : public std::iterator<std::forward_iterator_tag, Entity> {
       using int_iter = EntityContainer::iterator;
 
      public:
-      iterator(EntityManager& em, int_iter index, int_iter end)
-          : _em(em),
+      iterator(ComponentManager& cm, int_iter index, int_iter end)
+          : _cm(cm),
             _index(index),
             _end(end),
-            _mask(EntityManager::component_mask<Args...>()) {
+            _mask(ComponentManager::component_mask<Components...>()) {
         while (_index != _end &&
-               (_mask & _em.component_mask(_index->second)) != _mask) {
+               (_mask & _cm.component_mask(_index->second)) != _mask) {
           ++_index;
         }
       }
@@ -60,24 +65,45 @@ class EntityManager : public NonCopyable {
         do {
           ++_index;
         } while (_index != _end &&
-                 (_mask & _em.component_mask(_index->second)) != _mask);
+                 (_mask & _cm.component_mask(_index->second)) != _mask);
         return *this;
       }
-      inline bool operator!=(iterator& it) { return it._index != _index; }
-      inline Entity& operator*() { return _index->second; }
+      inline iterator& operator++(int) {
+        ++(*this);
+        return *this;
+      }
+      inline bool operator==(iterator& it) const { return it._index == _index; }
+      inline bool operator!=(iterator& it) const { return it._index != _index; }
+      inline Entity& operator*() const { return _index->second; }
 
      private:
-      EntityManager& _em;
+      ComponentManager& _cm;
       ComponentMask _mask;
       int_iter _index, _end;
     };
     ComponentView(EntityManager& em) : _em(em) {}
 
     iterator begin() {
-      return iterator(_em, _em._entities.begin(), _em._entities.end());
+      return iterator(_em._component_manager, _em._entities.begin(),
+                      _em._entities.end());
     }
     iterator end() {
-      return iterator(_em, _em._entities.end(), _em._entities.end());
+      return iterator(_em._component_manager, _em._entities.end(),
+                      _em._entities.end());
+    }
+
+    size_t size() {
+      size_t s = 0;
+      for (auto it = begin(); it != end(); ++it, ++s) {
+      }
+      return s;
+    }
+    bool empty() { return size() == 0; }
+
+    void for_each(std::function<void(Entity& entity, Components&...)> f) {
+      for (auto& e : *this) {
+        f(e, *(_em._component_manager.get<Components>(e).get())...);
+      }
     }
 
    private:
@@ -89,9 +115,6 @@ class EntityManager : public NonCopyable {
   Entity& create();
   void destroy(id_type id);
 
-  const ComponentMask& component_mask(id_type id);
-  const ComponentMask& component_mask(const Entity& e);
-
   iterator begin() { return iterator(_entities.begin()); }
   iterator end() { return iterator(_entities.end()); }
   size_t size() { return _entities.size(); }
@@ -102,16 +125,10 @@ class EntityManager : public NonCopyable {
     return ComponentView<Components...>(*this);
   }
 
-  template <typename C>
-  static ComponentMask component_mask() {
-    ComponentMask mask;
-    mask.set(TypeID<C, Component>::value());
-    return mask;
-  }
-
-  template <typename C1, typename C2, typename... Components>
-  static ComponentMask component_mask() {
-    return component_mask<C1>() | component_mask<C2, Components...>();
+  template <typename... Components>
+  void for_each(typename identity<
+                std::function<void(Entity& entity, Components&...)>>::type f) {
+    component_view<Components...>().for_each(f);
   }
 
  private:

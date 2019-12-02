@@ -57,6 +57,7 @@ int main() {
   uecs::SystemManager sm(em, cm);
   uecs::Entity& e1 = em.create();
   uecs::Entity& e2 = em.create();
+  uecs::Entity& e3 = em.create();
 
   int i = 0;
 
@@ -81,17 +82,28 @@ int main() {
   cm.get<TestComponent>(e1)->_i = 4;
 
   cm.create<TestComponent1>(e2, i++);
-  std::cout << em.component_mask(e2).to_string() << std::endl;
+  std::cout << cm.component_mask(e2).to_string() << std::endl;
 
   for (uecs::Entity& e : em) {
     std::cout << e.id() << std::endl;
   }
   std::cout << "****************" << std::endl;
-  std::cout << e1.id() << " " << cm.has<TestComponent>(e1) << " " << e2.id()
-            << " " << cm.has<TestComponent>(e2) << std::endl;
-  for (auto& e : em.component_view<TestComponent2>()) {
-    std::cout << e.id() << " " << cm.has<TestComponent2>(e) << std::endl;
+  std::cout << e1.id() << " " << cm.has<TestComponent1>(e1) << " " << e2.id()
+            << " " << cm.has<TestComponent1>(e2) << std::endl;
+  std::cout << "Empty: " << em.component_view<TestComponent1>().empty()
+            << " | Size: " << em.component_view<TestComponent1>().size()
+            << std::endl;
+  for (auto& e : em.component_view<TestComponent, TestComponent1>()) {
+    std::cout << e.id() << " " << cm.get<TestComponent>(e)->_i << " "
+              << cm.get<TestComponent1>(e)->_i << std::endl;
   }
+
+  std::cout << "********3333********" << std::endl;
+  em.for_each<TestComponent, TestComponent1>(
+      [&](uecs::Entity& e, TestComponent& t, TestComponent1& t1) {
+        std::cout << t._i << " " << t1._i << std::endl;
+      });
+  std::cout << "********3333********" << std::endl;
 
   uecs::EventManager evm;
   TestReceiver tr;

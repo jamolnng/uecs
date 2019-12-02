@@ -92,6 +92,18 @@ class ComponentManager : public NonCopyable {
   const ComponentMask& component_mask(id_type entity_id);
   const ComponentMask& component_mask(const Entity& e);
 
+  template <typename C>
+  static ComponentMask component_mask() {
+    ComponentMask mask;
+    mask.set(TypeID<C, Component>::value());
+    return mask;
+  }
+
+  template <typename C1, typename C2, typename... Components>
+  static ComponentMask component_mask() {
+    return component_mask<C1>() | component_mask<C2, Components...>();
+  }
+
  private:
   friend class EntityManager;
   EntityComponentContainer _entity_components;

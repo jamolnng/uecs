@@ -32,11 +32,3 @@ void EntityManager::destroy(id_type id) {
   release_id(id);
   _entities.erase(_entities.find(id));
 }
-
-const EntityManager::ComponentMask& EntityManager::component_mask(const Entity& e) {
-  return _component_manager.component_mask(e);
-}
-
-const EntityManager::ComponentMask& EntityManager::component_mask(id_type id) {
-  return _component_manager.component_mask(id);
-}
