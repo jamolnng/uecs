@@ -152,7 +152,7 @@ class ComponentManager : public NonCopyable {
 
   template <typename C>
   static typename std::enable_if<std::is_base_of<Component, C>::value,
-                        ComponentMask>::type
+                                 ComponentMask>::type
   component_mask() {
     ComponentMask mask;
     mask.set(TypeID<C, Component>::value());
@@ -172,9 +172,23 @@ class ComponentManager : public NonCopyable {
 
   std::pair<ComponentContainer&, ComponentHelperContainer&> _check_exists(
       id_type entity_id) {
-    return std::pair<ComponentContainer&, ComponentHelperContainer&>(
-        _entity_components.try_emplace(entity_id).first->second,
-        _entity_component_helpers.try_emplace(entity_id).first->second);
+    ComponentContainer* cc = nullptr;
+    ComponentHelperContainer* chc = nullptr;
+    auto ec = _entity_components.find(entity_id);
+    if (ec != _entity_components.end()) {
+      cc = &ec->second;
+    } else {
+      _entity_components[entity_id] = ComponentContainer();
+      cc = &_entity_components[entity_id];
+    }
+    auto ech = _entity_component_helpers.find(entity_id);
+    if (ech != _entity_component_helpers.end()) {
+      chc = &ech->second;
+    } else {
+      _entity_component_helpers[entity_id] = ComponentHelperContainer();
+      chc = &_entity_component_helpers[entity_id];
+    }
+    return std::pair<ComponentContainer&, ComponentHelperContainer&>(*cc, *chc);
   }
 };
 }  // namespace uecs

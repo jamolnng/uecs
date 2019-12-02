@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <cstdlib>
 
 namespace uecs {
 constexpr const char* VERSION_STR = "0.0.1";
