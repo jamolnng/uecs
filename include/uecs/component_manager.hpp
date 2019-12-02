@@ -82,7 +82,7 @@ class ComponentManager : public NonCopyable {
 
   ComponentManager(EventManager& event_manager);
 
-  template <typename C, typename... Args>
+  template <typename C, typename... Args, typename = enable_if_C<C>>
   std::shared_ptr<C> create(Entity& e, Args&&... args) {
     auto p = _check_exists(e.id());
     std::shared_ptr<C> r = p.first.add<C>(std::forward<Args>(args)...);
@@ -91,7 +91,7 @@ class ComponentManager : public NonCopyable {
     return r;
   }
 
-  template <typename C>
+  template <typename C, typename = enable_if_C<C>>
   std::shared_ptr<C> bind(Entity& e, C&& component) {
     auto p = _check_exists(e.id());
     p.second.add<ComponentHelper<C>>();
@@ -100,7 +100,7 @@ class ComponentManager : public NonCopyable {
     return r;
   }
 
-  template <typename C>
+  template <typename C, typename = enable_if_C<C>>
   std::shared_ptr<C> bind(Entity& e, std::shared_ptr<C> component) {
     auto p = _check_exists(e.id());
     p.second.add<ComponentHelper<C>>();
@@ -109,7 +109,7 @@ class ComponentManager : public NonCopyable {
     return r;
   }
 
-  template <typename C>
+  template <typename C, typename = enable_if_C<C>>
   std::shared_ptr<C> swap(Entity& to, Entity& from) {
     auto f = _check_exists(from.id());
     f.second.add<ComponentHelper<C>>();
@@ -122,19 +122,19 @@ class ComponentManager : public NonCopyable {
     return r;
   }
 
-  template <typename C>
+  template <typename C, typename = enable_if_C<C>>
   std::shared_ptr<C> get(Entity& e) {
     auto p = _check_exists(e.id());
     return p.first.get<C>();
   }
 
-  template <typename C>
+  template <typename C, typename = enable_if_C<C>>
   bool has(const Entity& e) {
     auto p = _check_exists(e.id());
     return p.first.has<C>();
   }
 
-  template <typename C>
+  template <typename C, typename = enable_if_C<C>>
   void remove(Entity& e) {
     auto p = _check_exists(e.id());
     std::shared_ptr<C> r = p.first.get<C>();
@@ -151,7 +151,9 @@ class ComponentManager : public NonCopyable {
   const ComponentMask& component_mask(Entity& e);
 
   template <typename C>
-  static ComponentMask component_mask() {
+  static typename std::enable_if<std::is_base_of<Component, C>::value,
+                        ComponentMask>::type
+  component_mask() {
     ComponentMask mask;
     mask.set(TypeID<C, Component>::value());
     return mask;
