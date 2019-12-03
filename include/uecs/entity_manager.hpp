@@ -123,6 +123,9 @@ class EntityManager : public NonCopyable {
   Entity& create();
   void destroy(Entity& e);
 
+  bool exists(id_type entity_id);
+  Entity& get(id_type entity_id);
+
   inline iterator begin() noexcept { return iterator(_entities.begin()); }
   inline iterator end() noexcept { return iterator(_entities.end()); }
   inline size_t size() const noexcept { return _entities.size(); }

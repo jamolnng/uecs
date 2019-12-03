@@ -39,3 +39,11 @@ void EntityManager::destroy(Entity& e) {
     _entities.erase(_entities.find(e.id()));
   }
 }
+
+bool EntityManager::exists(id_type entity_id) {
+  return _entities.find(entity_id) != _entities.end();
+}
+
+Entity& EntityManager::get(id_type entity_id) {
+  return _entities.at(entity_id);
+}
