@@ -13,7 +13,7 @@ template <typename T, size_t MAX_T>
 class UniqueContainer {
  protected:
   template <typename C>
-  using enable_if_T = std::enable_if<std::is_base_of<T, C>::value>;
+  using if_type = std::enable_if<std::is_base_of<T, C>::value>;
 
  public:
   using mask_type = std::bitset<MAX_T>;
@@ -26,21 +26,21 @@ class UniqueContainer {
 
    public:
     iterator(int_iter index, array_type& arr) : _index(index), _arr(arr) {
-      while (_index != _arr.size() && _arr.at(_index) == nullptr) {
+      while (_index != MAX_T && _arr.at(_index) == nullptr) {
         ++_index;
       }
     }
 
     inline iterator& operator++() {
+      if (_index == MAX_T) {
+        return *this;
+      }
       do {
         ++_index;
-      } while (_index != _arr.size() && _arr.at(_index) == nullptr);
+      } while (_index != MAX_T && _arr.at(_index) == nullptr);
       return *this;
     }
-    inline iterator& operator++(int) {
-      ++(*this);
-      return *this;
-    }
+    inline iterator operator++(int) { return ++(*this); }
     inline bool operator==(iterator& it) const { return it._index == _index; }
     inline bool operator!=(iterator& it) const { return it._index != _index; }
     inline std::shared_ptr<T> operator*() const { return _arr.at(_index); }
@@ -53,7 +53,7 @@ class UniqueContainer {
   iterator begin() { return iterator(0, _ts); }
   iterator end() { return iterator(_ts.size(), _ts); }
 
-  template <typename C, typename... Args, typename = enable_if_T<C>>
+  template <typename C, typename... Args, typename = if_type<C>>
   std::shared_ptr<C> add(Args&&... args) {
     id_type cid = TypeID<C, T>::value();
     if (_mask.test(cid)) {
@@ -65,7 +65,7 @@ class UniqueContainer {
     return c;
   }
 
-  template <typename C, typename = enable_if_T<C>>
+  template <typename C, typename = if_type<C>>
   void remove() {
     id_type cid = TypeID<C, T>::value();
     if (!_mask.test(cid)) {
@@ -75,7 +75,7 @@ class UniqueContainer {
     _ts[cid].reset();
   }
 
-  template <typename C, typename = enable_if_T<C>>
+  template <typename C, typename = if_type<C>>
   std::shared_ptr<C> get() {
     id_type cid = TypeID<C, T>::value();
     if (!_mask.test(cid)) {
@@ -84,7 +84,7 @@ class UniqueContainer {
     return std::shared_ptr<C>(std::static_pointer_cast<C>(_ts[cid]));
   }
 
-  template <typename C, typename = enable_if_T<C>>
+  template <typename C, typename = if_type<C>>
   std::shared_ptr<C> insert(std::shared_ptr<C> c) {
     id_type cid = TypeID<C, T>::value();
     if (_mask.test(cid)) {
@@ -95,7 +95,7 @@ class UniqueContainer {
     return std::shared_ptr<C>(std::static_pointer_cast<C>(_ts[cid]));
   }
 
-  template <typename C, typename = enable_if_T<C>>
+  template <typename C, typename = if_type<C>>
   std::shared_ptr<C> insert(C&& c) {
     id_type cid = TypeID<C, T>::value();
     if (_mask.test(cid)) {
@@ -113,18 +113,18 @@ class UniqueContainer {
     }
   }
 
-  template <typename C, typename = enable_if_T<C>>
+  template <typename C, typename = if_type<C>>
   bool has() const {
     return _mask.test(TypeID<C, T>::value());
   }
 
   const mask_type& mask() const { return _mask; }
 
-  size_t size() const { _mask.count(); }
+  size_t size() const { return _mask.count(); }
   size_t capacity() const { return MAX_T; }
 
  protected:
-  mask_type _mask;
-  array_type _ts;
+  mask_type _mask{};
+  array_type _ts{};
 };
 }  // namespace uecs

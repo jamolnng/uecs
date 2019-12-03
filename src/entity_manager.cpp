@@ -32,8 +32,10 @@ Entity& EntityManager::create() {
 }
 
 void EntityManager::destroy(Entity& e) {
-  release_id(e.id());
-  _component_manager.remove_all(e);
-  _event_manager.emit<EntityDestroyedEvent>(e);
-  _entities.erase(_entities.find(e.id()));
+  if (e.valid()) {
+    release_id(e.id());
+    _component_manager.remove_all(e);
+    _event_manager.emit<EntityDestroyedEvent>(e);
+    _entities.erase(_entities.find(e.id()));
+  }
 }

@@ -20,7 +20,7 @@ class TypeID {
  public:
   TypeID() = delete;
   ~TypeID() = delete;
-  const static id_type value() {
+  static id_type value() {
     static id_type v = detail::TypeIDCounter<Base>::count()++;
     return v;
   }

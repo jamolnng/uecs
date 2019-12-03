@@ -16,7 +16,7 @@ class SystemManager : public NonCopyable,
                 ComponentManager& component_manager,
                 EventManager& event_manager);
 
-  template <typename S, typename = enable_if_T<S>>
+  template <typename S, typename = if_type<S>>
   void update(EntityManager& entity_manager, double dt) {
     get<S>()->update(dt);
   }

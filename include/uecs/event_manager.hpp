@@ -84,6 +84,6 @@ class EventManager {
  private:
   std::multimap<id_type, std::pair<const EventListener*,
                                    std::function<void(const void*)>>>
-      _listeners;
+      _listeners{};
 };
 }  // namespace uecs

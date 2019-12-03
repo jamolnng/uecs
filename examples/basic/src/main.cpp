@@ -73,12 +73,12 @@ class TestReceiver : public uecs::EventListener, public uecs::NonCopyable {
   }
   void receive(
       const uecs::ComponentManager::ComponentSwappedEvent<TestComponent>& c) {
-    std::cout << "TestComponent swapped to Entity ID: " << c.to.id() << " from "
+    std::cout << "TestComponent swapped to Entity ID: " << c.entity.id() << " from "
               << c.from.id() << " ci:" << c.component->_i << std::endl;
   }
   void receive(
       const uecs::ComponentManager::ComponentSwappedEvent<TestComponent1>& c) {
-    std::cout << "TestComponent1 swapped to Entity ID: " << c.to.id()
+    std::cout << "TestComponent1 swapped to Entity ID: " << c.entity.id()
               << " from " << c.from.id() << " ci:" << c.component->_i
               << std::endl;
   }
@@ -105,9 +105,9 @@ class TestReceiver : public uecs::EventListener, public uecs::NonCopyable {
   }
 };
 
-int main() {
-  std::array<int, 5>::iterator it;
+using ASDF = TestEvent;
 
+int main() {
   std::cout << std::boolalpha;
 
   uecs::EventManager evm;

@@ -6,13 +6,25 @@ ComponentManager::ComponentManager(EventManager& event_manager)
     : _event_manager(event_manager) {}
 
 const ComponentManager::ComponentMask& ComponentManager::component_mask(
-    Entity& e) {
-  return _entity_components[e.id()].mask();
+    Entity& e) const {
+  return _entity_components.at(e.id()).mask();
 }
 
 void ComponentManager::remove_all(Entity& e) {
-  for (auto c : _entity_component_helpers[e.id()]) {
+  _check_exists(e.id());
+  for (auto c : _entity_component_helpers.at(e.id())) {
     c->remove(*this, e);
   }
-  _entity_components[e.id()].clear();
+  _entity_components.at(e.id()).clear();
+}
+
+std::pair<ComponentManager::ComponentContainer&,
+          ComponentManager::ComponentHelperContainer&>
+ComponentManager::_check_exists(id_type entity_id) {
+  ComponentContainer& cc =
+      _entity_components.emplace(entity_id, ComponentContainer()).first->second;
+  ComponentHelperContainer& chc =
+      _entity_component_helpers.emplace(entity_id, ComponentHelperContainer())
+          .first->second;
+  return std::pair<ComponentContainer&, ComponentHelperContainer&>(cc, chc);
 }
