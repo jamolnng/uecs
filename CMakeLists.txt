@@ -66,14 +66,4 @@ assign_source_group(${PRIVATE_HEADERS})
 assign_source_group(${SHADERS})
 
 add_subdirectory(examples)
-
-# add_executable(example example.cpp)
-# target_link_libraries(example PRIVATE ${project_name})
-# 
-# if(UECS_TEST_ENABLE)
-#     add_executable(tests tests.cpp)
-#     add_test(
-#         NAME tests
-#         COMMAND $<TARGET_FILE:tests>)
-#     target_link_libraries(tests PRIVATE ${project_name})
-# endif(UECS_TEST_ENABLE)
+add_subdirectory(tests)
