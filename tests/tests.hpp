@@ -37,7 +37,7 @@ __tassertd(LHS l, RHS r, const char* l_str, const char* r_str, size_t line) {
   if (!(l == r)) {
     std::cout << "failed" << std::endl;
     std::cerr << "  Line " << line << ": " << l_str << " == " << r_str << " ("
-              << l << " == " << r_str << ")" << std::endl;
+              << l_str << " == " << r << ")" << std::endl;
     return false;
   }
   return true;
@@ -50,7 +50,7 @@ __tassertd(LHS l, RHS r, const char* l_str, const char* r_str, size_t line) {
   if (!(l == r)) {
     std::cout << "failed" << std::endl;
     std::cerr << "  Line " << line << ": " << l_str << " == " << r_str << " ("
-              << l_str << " == " << r << ")" << std::endl;
+              << l << " == " << r_str << ")" << std::endl;
     return false;
   }
   return true;
