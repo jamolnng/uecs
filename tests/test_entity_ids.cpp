@@ -3,12 +3,13 @@
 #include <uecs/uecs.hpp>
 
 using uecs::EntityManager;
+using uecs::id_type;
 using uecs::UECS;
 
 REGISTER_TEST(test_entity_ids) {
   UECS uecs;
   EntityManager& em = uecs._entities;
-  int i;
+  uecs::id_type i;
   // Test IDs are created in ascending order starting at 0
   for (i = 0; i < 10; ++i) {
     TASSERTD(em.create().id(), i)
@@ -22,7 +23,7 @@ REGISTER_TEST(test_entity_ids) {
 
   // Test out of order
   em.destroy(em.get(1));
-  TASSERTD(em.create().id(), 1)
+  TASSERTD(em.create().id(), id_type(1))
   TASSERTD(em.create().id(), i + 2)
 
   TPASS()

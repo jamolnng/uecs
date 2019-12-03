@@ -8,6 +8,7 @@ namespace uecs {
 namespace tests {
 namespace detail {
 extern const char* __test_name;
+bool __tassert(bool condition, const char* c_str, size_t line);
 bool __tassert(bool condition, const char* c_str, size_t line) {
   if (!condition) {
     std::cout << "failed" << std::endl;

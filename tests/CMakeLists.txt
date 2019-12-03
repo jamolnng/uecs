@@ -16,6 +16,14 @@ function(src_test src)
 endfunction(src_test)
 
 if(UECS_TEST_ENABLE)
+    if (CMAKE_CONFIGURATION_TYPES)
+        add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} 
+            --force-new-ctest-process --output-on-failure 
+            --build-config "$<CONFIGURATION>")
+    else()
+        add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} 
+            --force-new-ctest-process --output-on-failure)
+    endif()
     foreach(test_src ${TEST_SOURCES})
       src_test(${test_src})
     endforeach()
