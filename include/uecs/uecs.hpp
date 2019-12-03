@@ -8,3 +8,18 @@
 #include <uecs/event_manager.hpp>
 #include <uecs/system.hpp>
 #include <uecs/system_manager.hpp>
+
+namespace uecs {
+class UECS {
+ public:
+  UECS()
+      : _components(_events),
+        _entities(_components, _events),
+        _systems(_entities, _components, _events){};
+
+  uecs::EventManager _events{};
+  uecs::ComponentManager _components;
+  uecs::EntityManager _entities;
+  uecs::SystemManager _systems;
+};
+}  // namespace uecs
