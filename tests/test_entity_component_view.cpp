@@ -92,5 +92,12 @@ REGISTER_TEST(test_entity_component_view) {
   }
   TASSERTD(i, 3u)
 
+  i = 0u;
+  for (auto& e : em.component_view<TestComponent2Test, TestComponent2,
+                                   TestComponent3>()) {
+    ++i;
+  }
+  TASSERTD(i, 3u)
+
   TPASS()
 }
