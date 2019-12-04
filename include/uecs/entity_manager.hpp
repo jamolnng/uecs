@@ -18,13 +18,17 @@
 namespace uecs {
 class EntityManager : public NonCopyable {
  private:
+  using EntityContainer = std::unordered_map<id_type, Entity>;
   template <typename... Components>
   using view_fn = typename identity<
       std::function<void(Entity& entity, Components&...)>>::type;
 
- public:
-  using EntityContainer = std::unordered_map<id_type, Entity>;
+  struct ComponentTestBase {
+   public:
+    ComponentTestBase() = delete;
+  };
 
+ public:
   class iterator : std::iterator<std::forward_iterator_tag, Entity> {
    private:
     using int_iter = EntityContainer::iterator;
@@ -44,7 +48,7 @@ class EntityManager : public NonCopyable {
     int_iter _index;
   };
 
-  template <typename... Components>
+  template <typename validv, typename... Components>
   class ComponentView {
    public:
     class iterator : public std::iterator<std::forward_iterator_tag, Entity> {
@@ -52,13 +56,14 @@ class EntityManager : public NonCopyable {
       using int_iter = EntityContainer::iterator;
 
      public:
-      iterator(ComponentManager& cm, int_iter index, int_iter end)
-          : _cm(cm),
+      iterator(EntityManager& em, int_iter index, int_iter end)
+          : _em(em),
+            _mask(ComponentManager::component_mask<Components...>()),
             _index(index),
-            _end(end),
-            _mask(ComponentManager::component_mask<Components...>()) {
+            _end(end) {
         while (_index != _end &&
-               (_mask & _cm.component_mask(_index->second)) != _mask) {
+               !validv::valid(_mask, _em._component_manager.component_mask(
+                                         _index->second))) {
           ++_index;
         }
       }
@@ -69,7 +74,8 @@ class EntityManager : public NonCopyable {
         do {
           ++_index;
         } while (_index != _end &&
-                 (_mask & _cm.component_mask(_index->second)) != _mask);
+                 !validv::valid(_mask, _em._component_manager.component_mask(
+                                           _index->second)));
         return *this;
       }
       inline iterator operator++(int) { return ++(*this); }
@@ -78,18 +84,16 @@ class EntityManager : public NonCopyable {
       inline Entity& operator*() const { return _index->second; }
 
      private:
-      ComponentManager& _cm;
-      int_iter _index, _end;
+      EntityManager& _em;
       ComponentManager::ComponentMask _mask;
+      int_iter _index, _end;
     };
     ComponentView(EntityManager& em) noexcept : _em(em) {}
     inline iterator begin() {
-      return iterator(_em._component_manager, _em._entities.begin(),
-                      _em._entities.end());
+      return iterator(_em, _em._entities.begin(), _em._entities.end());
     }
     inline iterator end() {
-      return iterator(_em._component_manager, _em._entities.end(),
-                      _em._entities.end());
+      return iterator(_em, _em._entities.end(), _em._entities.end());
     }
     inline size_t size() {
       size_t s = 0;
@@ -104,8 +108,22 @@ class EntityManager : public NonCopyable {
       }
     }
 
-   private:
+   protected:
     EntityManager& _em;
+  };
+
+  struct ContainsComponentsTest : public ComponentTestBase {
+    static bool valid(const ComponentManager::ComponentMask& m1,
+                      const ComponentManager::ComponentMask& m2) {
+      return (m1 & m2) == m1;
+    };
+  };
+
+  struct ExactComponentsTest : public ComponentTestBase {
+    static bool valid(const ComponentManager::ComponentMask& m1,
+                      const ComponentManager::ComponentMask& m2) {
+      return m1 == m2;
+    };
   };
 
   struct EntityCreatedEvent : public Event {
@@ -131,13 +149,31 @@ class EntityManager : public NonCopyable {
   inline size_t size() const noexcept { return _entities.size(); }
   inline bool empty() const noexcept { return _entities.empty(); }
 
+  template <typename ComponentTest, typename... Components>
+  typename std::enable_if<
+      std::is_base_of<ComponentTestBase, ComponentTest>::value,
+      ComponentView<ComponentTest, Components...>>::type
+  component_view() {
+    return ComponentView<ComponentTest, Components...>(*this);
+  }
+
   template <typename... Components>
-  ComponentView<Components...> component_view() {
-    return ComponentView<Components...>(*this);
+  ComponentView<ContainsComponentsTest, Components...>
+  contains_component_view() {
+    return ComponentView<ContainsComponentsTest, Components...>(*this);
   }
   template <typename... Components>
-  inline void for_each(view_fn<Components...> f) {
-    component_view<Components...>().for_each(f);
+  inline void contains_for_each(view_fn<Components...> f) {
+    contains_component_view<Components...>().for_each(f);
+  }
+
+  template <typename... Components>
+  ComponentView<ExactComponentsTest, Components...> exact_component_view() {
+    return ComponentView<ExactComponentsTest, Components...>(*this);
+  }
+  template <typename... Components>
+  inline void exact_for_each(view_fn<Components...> f) {
+    exact_component_view<Components...>().for_each(f);
   }
 
  private:
@@ -149,5 +185,5 @@ class EntityManager : public NonCopyable {
 
   id_type reserve_id();
   void release_id(id_type id);
-};
+};  // namespace uecs
 }  // namespace uecs

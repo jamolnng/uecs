@@ -73,8 +73,9 @@ class TestReceiver : public uecs::EventListener, public uecs::NonCopyable {
   }
   void receive(
       const uecs::ComponentManager::ComponentSwappedEvent<TestComponent>& c) {
-    std::cout << "TestComponent swapped to Entity ID: " << c.entity.id() << " from "
-              << c.from.id() << " ci:" << c.component->_i << std::endl;
+    std::cout << "TestComponent swapped to Entity ID: " << c.entity.id()
+              << " from " << c.from.id() << " ci:" << c.component->_i
+              << std::endl;
   }
   void receive(
       const uecs::ComponentManager::ComponentSwappedEvent<TestComponent1>& c) {
@@ -158,22 +159,31 @@ int main() {
 
   std::cout << "Entities:" << std::endl;
   for (uecs::Entity& e : em) {
-    std::cout << e.id() << std::endl;
+    std::cout << "id: " << e.id()
+              << " mask: " << cm.component_mask(e).to_string() << std::endl;
   }
   std::cout
-      << "Entities with TestComponent and TestComponent1 two different ways:"
+      << "Entities with TestComponent and TestComponent1 three different ways:"
       << std::endl;
-  for (auto& e : em.component_view<TestComponent, TestComponent1>()) {
+  for (auto& e : em.contains_component_view<TestComponent, TestComponent1>()) {
     std::cout << "Entity ID: " << e.id() << " ci "
               << cm.get<TestComponent>(e)->_i << " c1i "
               << cm.get<TestComponent1>(e)->_i << std::endl;
   }
 
-  em.for_each<TestComponent, TestComponent1>(
+  em.contains_for_each<TestComponent, TestComponent1>(
       [&](uecs::Entity& e, TestComponent& t, TestComponent1& t1) {
-        std::cout << "Entity ID: " << e.id() << " ci " << t._i << " c1i " << t1._i
-                  << std::endl;
+        std::cout << "Entity ID: " << e.id() << " ci " << t._i << " c1i "
+                  << t1._i << std::endl;
       });
+
+  for (uecs::Entity& e :
+       em.component_view<uecs::EntityManager::ContainsComponentsTest,
+                         TestComponent, TestComponent1>()) {
+    std::cout << "Entity ID: " << e.id() << " ci "
+              << cm.get<TestComponent>(e)->_i << " c1i "
+              << cm.get<TestComponent1>(e)->_i << std::endl;
+  }
 
   e1.destroy();
   e2.destroy();
