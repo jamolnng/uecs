@@ -22,5 +22,5 @@ class UECS {
 UECS::UECS()
     : _components(_events),
       _entities(_components, _events),
-      _systems(_entities, _components, _events){};
+      _systems(_entities, _components, _events) {}
 }  // namespace uecs
