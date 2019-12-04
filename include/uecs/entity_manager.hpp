@@ -23,11 +23,6 @@ class EntityManager : public NonCopyable {
   using view_fn = typename identity<
       std::function<void(Entity& entity, Components&...)>>::type;
 
-  struct ComponentTestBase {
-   public:
-    ComponentTestBase() = delete;
-  };
-
  public:
   class iterator : std::iterator<std::forward_iterator_tag, Entity> {
    private:
@@ -110,6 +105,11 @@ class EntityManager : public NonCopyable {
 
    protected:
     EntityManager& _em;
+  };
+
+  struct ComponentTestBase {
+   public:
+    ComponentTestBase() = delete;
   };
 
   struct ContainsComponentsTest : public ComponentTestBase {
