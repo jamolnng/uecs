@@ -183,7 +183,7 @@ class EntityManager : public NonCopyable {
   ComponentManager& _component_manager;
   EventManager& _event_manager;
 
-  id_type reserve_id();
-  void release_id(id_type id);
+  id_type _reserve_id();
+  void _release_id(id_type id);
 };  // namespace uecs
 }  // namespace uecs
