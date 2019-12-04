@@ -6,8 +6,8 @@ ComponentManager::ComponentManager(EventManager& event_manager)
     : _event_manager(event_manager) {}
 
 const ComponentManager::ComponentMask& ComponentManager::component_mask(
-    Entity& e) const {
-  return _entity_components.at(e.id()).mask();
+    Entity& e) {
+  return _check_exists(e.id()).first.mask();
 }
 
 void ComponentManager::remove_all(Entity& e) {

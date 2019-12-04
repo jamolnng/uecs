@@ -142,7 +142,7 @@ class ComponentManager : public NonCopyable {
 
   void remove_all(Entity& e);
 
-  const ComponentMask& component_mask(Entity& e) const;
+  const ComponentMask& component_mask(Entity& e);
 
   template <typename C>
   static typename std::enable_if<std::is_base_of<Component, C>::value,
