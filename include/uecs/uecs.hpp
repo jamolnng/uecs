@@ -12,14 +12,15 @@
 namespace uecs {
 class UECS {
  public:
-  UECS()
-      : _components(_events),
-        _entities(_components, _events),
-        _systems(_entities, _components, _events){};
+  UECS();
 
   uecs::EventManager _events{};
   uecs::ComponentManager _components;
   uecs::EntityManager _entities;
   uecs::SystemManager _systems;
 };
+UECS::UECS()
+    : _components(_events),
+      _entities(_components, _events),
+      _systems(_entities, _components, _events){};
 }  // namespace uecs
