@@ -21,5 +21,4 @@ script:
     - cmake -DCMAKE_BUILD_TYPE=Release ../
     - make
     - make check
-    - ls tests -al
     - cat tests/Testing/Temporary/LastTest.log
