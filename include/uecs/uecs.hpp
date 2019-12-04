@@ -13,7 +13,7 @@ namespace uecs {
 class UECS {
  public:
   UECS();
-  ~UECS() = default;
+  ~UECS();
 
   uecs::EventManager _events{};
   uecs::ComponentManager _components;
@@ -24,4 +24,5 @@ UECS::UECS()
     : _components(_events),
       _entities(_components, _events),
       _systems(_entities, _components, _events) {}
+UECS::~UECS() {}
 }  // namespace uecs

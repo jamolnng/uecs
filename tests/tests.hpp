@@ -75,7 +75,7 @@ __tassertd(LHS l, RHS r, const char* l_str, const char* r_str, size_t line) {
 
 #define REGISTER_TEST(name)                             \
   const char* uecs::tests::detail::__test_name = #name; \
-  inline int name(int argc, char* argvp[]);             \
+  int name(int argc, char* argvp[]);                    \
   int main(int argc, char* argv[]) {                    \
     std::cout << #name << "... ";                       \
     if (name(argc, argv) == 0) {                        \
@@ -85,7 +85,7 @@ __tassertd(LHS l, RHS r, const char* l_str, const char* r_str, size_t line) {
       return -1;                                        \
     }                                                   \
   }                                                     \
-  inline int name(int argc, char* argvp[])
+  int name(int argc, char* argvp[])
 
 #define TASSERT(condition)                                                \
   if (!uecs::tests::detail::__tassert(condition, #condition, __LINE__)) { \
