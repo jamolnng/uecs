@@ -13,6 +13,7 @@ namespace uecs {
 class UECS {
  public:
   UECS();
+  ~UECS() = default;
 
   uecs::EventManager _events{};
   uecs::ComponentManager _components;
