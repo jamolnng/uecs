@@ -11,8 +11,8 @@ id_type Entity::id() const noexcept { return _id; }
 
 void Entity::destroy() noexcept {
   if (valid()) {
-    _valid = false;
     _manager->destroy(*this);
+    _valid = false;
   }
 }
 bool Entity::valid() const noexcept { return _valid; }
