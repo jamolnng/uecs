@@ -1,6 +1,6 @@
 # μecs
 
-μicro (micro) entity component system
+micro entity component system
 
 |Master|Develop|
 |:-:|:-:|
