@@ -4,6 +4,8 @@
 #include <type_traits>
 #include <typeinfo>
 
+#include <uecs/config.hpp>
+
 namespace uecs {
 namespace tests {
 namespace detail {
@@ -73,18 +75,19 @@ __tassertd(LHS l, RHS r, const char* l_str, const char* r_str, size_t line) {
 }  // namespace tests
 }  // namespace uecs
 
-#define REGISTER_TEST(name)                             \
-  const char* uecs::tests::detail::__test_name = #name; \
-  int name(int argc, char* argvp[]);                    \
-  int main(int argc, char* argv[]) {                    \
-    std::cout << #name << "... ";                       \
-    if (name(argc, argv) == 0) {                        \
-      std::cout << "passed" << std::endl;               \
-      return 0;                                         \
-    } else {                                            \
-      return -1;                                        \
-    }                                                   \
-  }                                                     \
+#define REGISTER_TEST(name)                                  \
+  const char* uecs::tests::detail::__test_name = #name;      \
+  int name(int argc, char* argvp[]);                         \
+  int main(int argc, char* argv[]) {                         \
+    std::cout << "uecs v" << uecs::VERSION_STR << std::endl; \
+    std::cout << #name << "... ";                            \
+    if (name(argc, argv) == 0) {                             \
+      std::cout << "passed" << std::endl;                    \
+      return 0;                                              \
+    } else {                                                 \
+      return -1;                                             \
+    }                                                        \
+  }                                                          \
   int name(int argc, char* argvp[])
 
 #define TASSERT(condition)                                                \
