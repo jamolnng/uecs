@@ -1,4 +1,6 @@
-# μecs
-Micro Entity Component System
+![μecs - micro entity component system](docs/img/banner.svg)
 
-Master: [![Build Status](https://travis-ci.com/jamolnng/uecs.svg?branch=master)](https://travis-ci.com/jamolnng/uecs) | Develop [![Build Status](https://travis-ci.com/jamolnng/uecs.svg?branch=develop)](https://travis-ci.com/jamolnng/uecs)
+## Build Status
+|Branch| Master        | Develop       |
+|-|:-------------:|:-------------:|
+|| [![Build Status](https://travis-ci.com/jamolnng/uecs.svg?branch=master)](https://travis-ci.com/jamolnng/uecs)      | [![Build Status](https://travis-ci.com/jamolnng/uecs.svg?branch=develop)](https://travis-ci.com/jamolnng/uecs) |
