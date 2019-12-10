@@ -43,7 +43,7 @@ class EntityManager : public NonCopyable {
     int_iter _index;
   };
 
-  template <typename validv, typename... Components>
+  template <typename Compare, typename... Components>
   class ComponentView {
    public:
     class iterator : public std::iterator<std::forward_iterator_tag, Entity> {
@@ -57,8 +57,8 @@ class EntityManager : public NonCopyable {
             _index(index),
             _end(end) {
         while (_index != _end &&
-               !validv::valid(_mask, _em._component_manager.component_mask(
-                                         _index->second))) {
+               !_compare(_mask, _em._component_manager.component_mask(
+                                    _index->second))) {
           ++_index;
         }
       }
@@ -69,8 +69,8 @@ class EntityManager : public NonCopyable {
         do {
           ++_index;
         } while (_index != _end &&
-                 !validv::valid(_mask, _em._component_manager.component_mask(
-                                           _index->second)));
+                 !_compare(_mask, _em._component_manager.component_mask(
+                                      _index->second)));
         return *this;
       }
       inline iterator operator++(int) { return ++(*this); }
@@ -82,6 +82,7 @@ class EntityManager : public NonCopyable {
       EntityManager& _em;
       ComponentManager::ComponentMask _mask;
       int_iter _index, _end;
+      Compare _compare{};
     };
     ComponentView(EntityManager& em) noexcept : _em(em) {}
     inline iterator begin() {
@@ -106,24 +107,18 @@ class EntityManager : public NonCopyable {
    protected:
     EntityManager& _em;
   };
-
-  struct ComponentTestBase {
-   public:
-    ComponentTestBase() = delete;
-  };
-
-  struct ContainsComponentsTest : public ComponentTestBase {
-    static bool valid(const ComponentManager::ComponentMask& m1,
-                      const ComponentManager::ComponentMask& m2) {
+  struct ContainsComponentsTest {
+    bool operator()(const ComponentManager::ComponentMask& m1,
+                    const ComponentManager::ComponentMask& m2) {
       return (m1 & m2) == m1;
-    };
+    }
   };
 
-  struct ExactComponentsTest : public ComponentTestBase {
-    static bool valid(const ComponentManager::ComponentMask& m1,
-                      const ComponentManager::ComponentMask& m2) {
+  struct ExactComponentsTest {
+    bool operator()(const ComponentManager::ComponentMask& m1,
+                    const ComponentManager::ComponentMask& m2) {
       return m1 == m2;
-    };
+    }
   };
 
   struct EntityCreatedEvent : public Event {
@@ -150,10 +145,7 @@ class EntityManager : public NonCopyable {
   inline bool empty() const noexcept { return _entities.empty(); }
 
   template <typename ComponentTest, typename... Components>
-  typename std::enable_if<
-      std::is_base_of<ComponentTestBase, ComponentTest>::value,
-      ComponentView<ComponentTest, Components...>>::type
-  component_view() {
+  ComponentView<ComponentTest, Components...> component_view() {
     return ComponentView<ComponentTest, Components...>(*this);
   }
 
