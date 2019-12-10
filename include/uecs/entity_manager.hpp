@@ -43,7 +43,7 @@ class EntityManager : public NonCopyable {
     int_iter _index;
   };
 
-  template <typename validv, typename... Components>
+  template <typename Compare, typename... Components>
   class ComponentView {
    public:
     class iterator : public std::iterator<std::forward_iterator_tag, Entity> {
@@ -57,8 +57,8 @@ class EntityManager : public NonCopyable {
             _index(index),
             _end(end) {
         while (_index != _end &&
-               !validv::valid(_mask, _em._component_manager.component_mask(
-                                         _index->second))) {
+               !_compare(_mask, _em._component_manager.component_mask(
+                                    _index->second))) {
           ++_index;
         }
       }
@@ -69,8 +69,8 @@ class EntityManager : public NonCopyable {
         do {
           ++_index;
         } while (_index != _end &&
-                 !validv::valid(_mask, _em._component_manager.component_mask(
-                                           _index->second)));
+                 !_compare(_mask, _em._component_manager.component_mask(
+                                      _index->second)));
         return *this;
       }
       inline iterator operator++(int) { return ++(*this); }
@@ -82,6 +82,7 @@ class EntityManager : public NonCopyable {
       EntityManager& _em;
       ComponentManager::ComponentMask _mask;
       int_iter _index, _end;
+      Compare _compare{};
     };
     ComponentView(EntityManager& em) noexcept : _em(em) {}
     inline iterator begin() {
@@ -108,22 +109,24 @@ class EntityManager : public NonCopyable {
   };
 
   struct ComponentTestBase {
-   public:
-    ComponentTestBase() = delete;
+    virtual bool operator()(const ComponentManager::ComponentMask& m1,
+                            const ComponentManager::ComponentMask& m2) = 0;
   };
 
   struct ContainsComponentsTest : public ComponentTestBase {
-    static bool valid(const ComponentManager::ComponentMask& m1,
-                      const ComponentManager::ComponentMask& m2) {
+    virtual bool operator()(
+        const ComponentManager::ComponentMask& m1,
+        const ComponentManager::ComponentMask& m2) override {
       return (m1 & m2) == m1;
-    };
+    }
   };
 
   struct ExactComponentsTest : public ComponentTestBase {
-    static bool valid(const ComponentManager::ComponentMask& m1,
-                      const ComponentManager::ComponentMask& m2) {
+    virtual bool operator()(
+        const ComponentManager::ComponentMask& m1,
+        const ComponentManager::ComponentMask& m2) override {
       return m1 == m2;
-    };
+    }
   };
 
   struct EntityCreatedEvent : public Event {
