@@ -12,9 +12,9 @@ class TestComponent2 : public Component {};
 class TestComponent3 : public Component {};
 class TestComponent4 : public Component {};
 
-struct TestComponent2Test : public uecs::EntityManager::ComponentTestBase {
-  virtual bool operator()(const ComponentManager::ComponentMask& m1,
-                          const ComponentManager::ComponentMask& m2) override {
+struct TestComponent2Test {
+  bool operator()(const ComponentManager::ComponentMask& m1,
+                  const ComponentManager::ComponentMask& m2) {
     return m2.test(uecs::TypeID<TestComponent2, Component>::value());
   };
 };

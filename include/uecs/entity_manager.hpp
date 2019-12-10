@@ -107,24 +107,16 @@ class EntityManager : public NonCopyable {
    protected:
     EntityManager& _em;
   };
-
-  struct ComponentTestBase {
-    virtual bool operator()(const ComponentManager::ComponentMask& m1,
-                            const ComponentManager::ComponentMask& m2) = 0;
-  };
-
-  struct ContainsComponentsTest : public ComponentTestBase {
-    virtual bool operator()(
-        const ComponentManager::ComponentMask& m1,
-        const ComponentManager::ComponentMask& m2) override {
+  struct ContainsComponentsTest {
+    bool operator()(const ComponentManager::ComponentMask& m1,
+                    const ComponentManager::ComponentMask& m2) {
       return (m1 & m2) == m1;
     }
   };
 
-  struct ExactComponentsTest : public ComponentTestBase {
-    virtual bool operator()(
-        const ComponentManager::ComponentMask& m1,
-        const ComponentManager::ComponentMask& m2) override {
+  struct ExactComponentsTest {
+    bool operator()(const ComponentManager::ComponentMask& m1,
+                    const ComponentManager::ComponentMask& m2) {
       return m1 == m2;
     }
   };
@@ -153,10 +145,7 @@ class EntityManager : public NonCopyable {
   inline bool empty() const noexcept { return _entities.empty(); }
 
   template <typename ComponentTest, typename... Components>
-  typename std::enable_if<
-      std::is_base_of<ComponentTestBase, ComponentTest>::value,
-      ComponentView<ComponentTest, Components...>>::type
-  component_view() {
+  ComponentView<ComponentTest, Components...> component_view() {
     return ComponentView<ComponentTest, Components...>(*this);
   }
 
